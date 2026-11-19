@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#f5efdf">
+  <title>锦绣坊 · 古风绣娘养成</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./src/style.css">
+  <style>.unlock-input{width:100%;padding:11px;margin:8px 0;border:1px solid #d9cfba;background:#fffdf6}.unlock-status{min-height:20px;color:#a84943;font-size:13px}</style>
+</head>
+<body>
+  <main id="app">
+    <section id="home" class="screen home-screen">
+      <div class="home-mark" aria-hidden="true">绣</div>
+      <p class="eyebrow">姑苏 · 锦绣坊</p>
+      <h1>锦绣坊</h1>
+      <p class="slogan">一针一线，绣出自己的命</p>
+      <p class="home-copy">从一枚绣针起步，在四季流转里，<br>把命运绣成自己的模样。</p>
+      <label class="name-label" for="player-name">给自己取个名字</label>
+      <input id="player-name" maxlength="4" value="阿绣" aria-label="角色名字，最多四个字">
+      <div class="home-actions">
+        <button id="start-btn" class="primary">开始新故事</button>
+        <button id="continue-btn" class="secondary">继续旧日</button>
+        <button id="gallery-btn" class="text-button">结局图鉴</button>
+      </div>
+      <p class="home-foot">春生 · 夏长 · 秋收 · 冬藏</p>
+    </section>
+
+    <section id="game" class="screen game-screen hidden">
+      <header class="topbar">
+        <div><span class="eyebrow">锦绣坊 · <b id="season-label">春卷</b></span><h2 id="day-label">春一日 · 辰时</h2></div>
+        <span id="rank-label" class="rank-badge">学徒</span>
+      </header>
+      <section class="stats" aria-label="角色属性">
+        <div class="stat"><span>银钱</span><b id="cash-stat">0</b></div>
+        <div class="stat"><span>绣艺</span><b id="art-stat">0</b></div>
+        <div class="stat"><span>名声</span><b id="fame-stat">0</b></div>
+        <div class="stat"><span>心气</span><b id="spirit-stat">0</b></div>
+        <div class="stat"><span>人缘</span><b id="bond-stat">0</b></div>
+      </section>
+      <section class="affection"><span>沈砚 <b id="aff-shen">0</b></span><span>陆九 <b id="aff-lu">0</b></span><span>苏掌柜 <b id="aff-su">0</b></span></section>
+      <section class="scene-card">
+        <div class="scene-art" aria-hidden="true"><span>✿</span><i>⌁</i><em>⌁</em></div>
+        <p id="narrative" class="narrative">绣架前的晨光，落在一方未完的素绢上。</p>
+        <p id="toast" class="toast" role="status"></p>
+      </section>
+      <section class="action-area">
+        <div class="section-heading"><h3>今日做些什么</h3><span id="turn-label">第一时辰</span></div>
+        <div class="action-grid">
+          <button data-action="work">做绣活</button><button data-action="learn">偷学花样</button>
+          <button data-action="market">集市卖帕</button><button data-action="school">书院听书</button>
+          <button data-action="dock">码头送货</button><button data-action="rest">歇一歇</button>
+          <button data-action="visit">拜访某人</button><button data-action="contest" id="contest-btn">绣庄比试</button>
+        </div>
+        <div class="bottom-actions"><button id="save-btn" class="text-button">手动存档</button><button id="restart-btn" class="text-button">重新开始</button><button id="home-gallery-btn" class="text-button">图鉴</button></div>
+      </section>
+    </section>
+
+    <section id="gallery" class="screen gallery-screen hidden">
+      <button class="back-button" data-back="home">‹ 返回</button>
+      <p class="eyebrow">岁月留痕</p><h2>结局图鉴</h2><p class="gallery-intro">每一种选择，都有它的花期。</p>
+      <div id="ending-list" class="ending-list"></div>
+    </section>
+    <div id="modal-root"></div>
+  </main>
+  <script defer src="./src/engine.js"></script>
+  <script defer src="./src/unlock.js"></script>
+  <script defer src="./src/seasons.js"></script>
+  <script defer src="./src/game.js"></script>
+</body>
+</html>
