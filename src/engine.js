@@ -14,7 +14,7 @@
     if (g.aff[0] >= 22 && g.fame >= 18) return "shen";
     if (g.aff[1] >= 22 && g.spirit >= 25) return "lu";
     if (g.aff[2] >= 24 && g.art >= 48) return "掌柜";
-    if (g.spirit <= 12) return "ill";
+    if (g.spirit <= 8) return "ill";
     if (g.cash < 12 && g.fame < 18) return "sold";
     return "ownname";
   }
@@ -26,6 +26,7 @@
     }
     function change(key, amount) { var cap=key==="cash"?999:100;g[key]=Math.max(0,Math.min(cap,(g[key]||0)+amount)); }
     function gain(key, amount, act) { change(key,Math.round(amount*factor(key,act))); }
+    if((g.spirit||0)<=0&&action!=="rest")action="rest";
     if(action==="work"){gain("cash",5+roll,action);gain("art",2+(roll===2?1:0),action);change("spirit",-6-(g.lastAction===action?Math.min(7,(g.actionStreak||0)*2):0));}
     if(action==="learn"){gain("art",3+roll,action);change("spirit",-7);gain("fame",roll===2?1:0,action);}
     if(action==="market"){gain("cash",7+roll,action);gain("fame",1,action);change("spirit",-5);}
@@ -34,7 +35,7 @@
     if(action==="rest")change("spirit",18);
     if(action==="contest"){gain("art",2,action);gain("fame",3+roll,action);change("spirit",-7);}
     if(g.lastAction===action)g.actionStreak=(g.actionStreak||0)+1;else{g.lastAction=action;g.actionStreak=1;}
-    g.turn++; if (g.turn === 2) { g.turn = 0; g.day++; if (g.day > 10) { g.day = 1; g.season++; g.spirit = Math.min(100, g.spirit + 12); } }
+    g.turn++; if (g.turn === 2) { g.turn = 0; g.day++; if (g.day > 10) { g.day = 1; g.season++; if (g.season < 4) g.spirit = Math.min(100, g.spirit + 20); } }
     return g;
   }
   var api = { rankLevel: rankLevel, endingId: endingId, endingNames: names, apply: apply };

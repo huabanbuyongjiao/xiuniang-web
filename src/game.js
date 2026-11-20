@@ -13,7 +13,7 @@
     { id:"lu", title:"随陆九看遍山河", hint:"与陆九同行，且把心气照料好。", verdict:"帆外有归途", body:"陆九的船驶出苏州时，阿绣带走了针盒，也带走自己的账本。她替沿河人家修衣换宿，教船上女眷做活议价；遇见风浪便停船，遇见不平便开口。江湖并非故事里的快意，她却在每座陌生码头都找到落脚处，知道归途由自己择定。", test:function(g){return g.aff[1]>=22&&g.spirit>=25;} },
     { id:"掌柜", title:"锦绣坊新掌柜", hint:"赢得苏掌柜信任，绣艺也要过硬。", verdict:"旧坊换新主", body:"苏掌柜将账册和钥匙交到她手里，没有一句挽留。阿绣先重订工钱，再把学徒的名字写进每笔账。锦绣坊照旧临河而开，规矩却渐渐不同：女工可以议价，可以歇息，也可以离去。她守住老招牌，更替后来的人留了一道不必低头的门。", test:function(g){return g.aff[2]>=24&&g.art>=48;} },
     { id:"saint", title:"名动江南的绣圣", hint:"以极深绣艺和声名写成一卷。", verdict:"千针照万家", body:"她的一幅《归舟》传遍江南，绣线里既有水乡烟雨，也有女子归家或远行的身影。人们称她绣圣，她只说每一针都从许多双手学来。成名后她不闭门藏艺，反而把针法写成薄册送往各地，让寻常人家的女儿也能凭手艺谋生。", test:function(g){return g.art>=88&&g.fame>=45;} },
-    { id:"ill", title:"灯下病骨", hint:"若总不肯歇息，身子会先替你作答。", verdict:"灯尽针犹暖", body:"长年赶工终于压弯了她的肩。病榻边堆着未完的绣样，窗外姑娘们轮流替她收针、讨工钱。阿绣没有留下惊天名声，却把一册针法和一张工价表交给后来人。灯火渐弱时，她听见坊里有人笑谈明日的安排，明白自己的辛苦终究没有白费。", test:function(g){return g.spirit<=12;} },
+    { id:"ill", title:"灯下病骨", hint:"若总不肯歇息，身子会先替你作答。", verdict:"灯尽针犹暖", body:"长年赶工终于压弯了她的肩。病榻边堆着未完的绣样，窗外姑娘们轮流替她收针、讨工钱。阿绣没有留下惊天名声，却把一册针法和一张工价表交给后来人。灯火渐弱时，她听见坊里有人笑谈明日的安排，明白自己的辛苦终究没有白费。", test:function(g){return g.spirit<=8;} },
     { id:"sold", title:"一纸远行契", hint:"钱粮与名声都未能攒下，契约仍在。", verdict:"身去心不卖", body:"债主递来新的契纸，她看清字句后没有哭，只将旧账一笔笔念给众人听。终究还是离开苏州，去往陌生人家做绣工；临行前，她把针法留给同伴，也记下欠她工钱的人名。路途未必宽阔，但那枚指印不再代表沉默，她知道自己还会为自由作证。", test:function(g){return g.cash<12&&g.fame<18;} },
     { id:"ownname", title:"留下自己的名字", hint:"这一年如何取舍，皆会落在自己的名字下。", verdict:"此生自落款", body:"岁末绣卷铺开，既无宫门召书，也无富贵车马。阿绣却把四季做过的针脚都绣进一幅长图：有同伴的手，有自己的名字，也有未曾走完的路。她不把平凡当作输赢，收起针时心中已有主意。明年要去哪里、做什么，都由她亲自落款。", test:function(){return true;} }
   ];
@@ -162,7 +162,9 @@
     if(type==="rest"){change("spirit",18);}
     if(type==="contest"){gain("art",2,type);gain("fame",3+roll,type);change("spirit",-7);game.contest=true;}
     recordAction(type);
-    say(actionLines[type][roll%actionLines[type].length]); render(); advance();
+    say(actionLines[type][roll%actionLines[type].length]); render();
+    if(type!=="rest"&&game.spirit>0&&game.spirit<=20) toast("心气只剩 "+game.spirit+"，记得歇一歇，别累病了。");
+    advance();
   }
   function recordAction(type) { if(game.lastAction===type)game.actionStreak+=1;else{game.lastAction=type;game.actionStreak=1;} }
   async function advance() {
@@ -170,7 +172,7 @@
     if (game.turn >= 2) { game.turn=0;game.day+=1; }
     if (game.day > 10) {
       if (game.season === 0) { game.day=10; game.turn=1; game.springComplete=true; showSpringEnd(); await save(); return; }
-      game.season+=1;game.day=1;game.spirit=clamp(game.spirit+12,0,100);
+      game.season+=1;game.day=1;if(game.season<4)game.spirit=clamp(game.spirit+20,0,100);
       if(game.season>=4){game.season=4;game.day=10;game.turn=1;finishGame();return;}
     }
     render(); await save(); window.setTimeout(maybeEvent,80);
@@ -178,7 +180,9 @@
   function finishGame() {
     if (!game || game.ending) return;
     var available=endings.filter(function(e){return e.test(game);});
-    if(!available.length) available=[endings[game.spirit<12?6:7]];
+    var fallback=["ill","sold","ownname"];var good=available.filter(function(e){return fallback.indexOf(e.id)<0;});
+    if(good.length) available=good; else { var ill=available.filter(function(e){return e.id==="ill";}); if(ill.length) available=ill; }
+    if(!available.length) available=[endings[8]];
     var ending=available[Math.floor(Math.random()*available.length)];game.ending=ending.id;
     if(game.endings.indexOf(ending.id)<0)game.endings.push(ending.id);
     game.busy=true;render();
@@ -204,12 +208,23 @@
     var options=[{label:"再绣一次春卷",run:function(){closeModal();newGame();}}];
     modal(titles[tier], bodies[tier] + "\n\n" + stats + "\n\n夏卷正在绣制中，敬请期待。收藏关注，第一时间看到新卷。", options);
   }
+  function unlocked() { try { return localStorage.getItem("jxf_access_v2")==="1"; } catch(error) { return false; } }
+  function refreshUnlockBadge() { var b=document.getElementById("unlock-home-btn"),n=document.getElementById("unlock-note"); if(!b||!n)return; if(unlocked()){b.classList.add("hidden");n.textContent="已解锁完整版 · 四卷全开";}else{b.classList.remove("hidden");n.textContent="春卷免费试玩 · 解锁后畅玩夏秋冬三卷";} }
   function showUnlockCard() {
-    var root=q("modal-root");root.innerHTML="";var back=document.createElement("div");back.className="modal-backdrop";var box=document.createElement("section");box.className="modal";
-    var h=document.createElement("h2");h.textContent="春卷已绣完";var p=document.createElement("p");p.className="modal-copy";p.textContent="输入解锁码，继续夏、秋、冬三卷与全部 9 个结局（一次买断，手机电脑都能玩）";
-    var input=document.createElement("input");input.id="unlock-input";input.setAttribute("aria-label","解锁码");input.placeholder="JXF-XXXX-XXXX";input.className="unlock-input";var status=document.createElement("p");status.id="unlock-status";status.className="unlock-status";status.setAttribute("role","status");
-    var button=document.createElement("button");button.className="modal-primary";button.textContent="解锁";button.addEventListener("click",function(){if(!window.JXFCode.valid(input.value)){status.textContent="码无效，请检查后再试。";return;}localStorage.setItem("jxf_access_v2","1");status.textContent="已解锁";window.setTimeout(function(){closeModal();game.season=1;game.day=1;game.turn=0;render();say("已解锁。夏日新长，门外的路由由你自己选。");save();},250);});
-    box.appendChild(h);box.appendChild(p);box.appendChild(input);box.appendChild(button);box.appendChild(status);back.appendChild(box);root.appendChild(back);
+    var root=q("modal-root");root.innerHTML="";var back=document.createElement("div");back.className="modal-backdrop";var box=document.createElement("section");box.className="modal unlock-modal";
+    var close=document.createElement("button");close.className="modal-close";close.setAttribute("aria-label","关闭");close.textContent="×";
+    var fromSpring=!!(game&&game.springComplete&&game.season===0);
+    var h=document.createElement("h2");h.textContent=fromSpring?"春卷已绣完":"解锁完整版";var p=document.createElement("p");p.className="modal-copy";p.textContent=(fromSpring?"免费试玩到此为止，进度已自动保存。":"")+"输入解锁码，继续夏、秋、冬三卷与全部 9 个结局。一次解锁，本浏览器永久有效。";
+    var input=document.createElement("input");input.id="unlock-input";input.setAttribute("aria-label","解锁码");input.setAttribute("autocomplete","off");input.setAttribute("autocapitalize","characters");input.setAttribute("spellcheck","false");input.placeholder="JXF-XXXX-XXXX";input.className="unlock-input";var status=document.createElement("p");status.id="unlock-status";status.className="unlock-status";status.setAttribute("role","status");
+    var actions=document.createElement("div");actions.className="modal-actions";
+    var later=document.createElement("button");later.id="unlock-later";later.className="modal-secondary";later.textContent=fromSpring?"先不解锁，回首页":"返回";
+    var button=document.createElement("button");button.id="unlock-submit";button.className="modal-primary";button.textContent="解锁";
+    function leave(){closeModal();if(fromSpring){showScreen("home");refreshContinue();}refreshUnlockBadge();}
+    close.addEventListener("click",leave);later.addEventListener("click",leave);
+    function submit(){if(!window.JXFCode.valid(input.value)){status.textContent="码无效，请检查后再试（不区分大小写，横线可省略）。";return;}try{localStorage.setItem("jxf_access_v2","1");}catch(error){}status.textContent="已解锁";refreshUnlockBadge();window.setTimeout(function(){closeModal();if(game&&game.springComplete&&game.season===0){showScreen("game");game.season=1;game.day=1;game.turn=0;render();say("已解锁。夏日新长，门外的路由你自己选。");save();}else{toast("已解锁完整版，春卷绣完会直接进入夏卷。");}},250);}
+    button.addEventListener("click",submit);input.addEventListener("keydown",function(ev){if(ev.key==="Enter")submit();});
+    actions.appendChild(later);actions.appendChild(button);
+    box.appendChild(close);box.appendChild(h);box.appendChild(p);box.appendChild(input);box.appendChild(status);box.appendChild(actions);back.appendChild(box);root.appendChild(back);
   }
   async function newGame() { game=freshGame(q("player-name").value.trim().slice(0,4));if(!game.name)game.name="阿绣";game.rankLevel=0;showScreen("game");say(game.name+"在一纸契书上按下指印。她没有看见自己的名字，便在绣架边，先绣下了它。");render();refreshReward();await save(); }
   async function continueGame() { var data=await getLocalData(STORAGE_KEY);if(!data){toast("还没有存下的故事。");return;}game=data;game.busy=false;if(typeof game.rankLevel!=="number"||!isFinite(game.rankLevel))game.rankLevel=0;if(game.springComplete){if(localStorage.getItem("jxf_access_v2")==="1"){game.season=1;game.day=1;game.turn=0;}else{showScreen("game");render();showUnlockCard();return;}}showScreen("game");render();say("针线仍在原处，故事从你离开的那一针继续。"); }
@@ -240,6 +255,6 @@
       }
     }) });
   }
-  function init() { ["home","game","gallery","modal-root"].forEach(function(id){el[id]=q(id);});bind();mountDebugHook();refreshContinue(); }
+  function init() { ["home","game","gallery","modal-root"].forEach(function(id){el[id]=q(id);});bind();mountDebugHook();refreshContinue();refreshUnlockBadge();var ub=document.getElementById("unlock-home-btn");if(ub)ub.addEventListener("click",showUnlockCard); }
   init();
 }());
